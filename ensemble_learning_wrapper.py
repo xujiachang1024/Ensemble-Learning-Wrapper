@@ -11,6 +11,7 @@ class EnsembleClassificationWrapper(object):
             if type == "NumPyBased0hlNeuralNetwork":
                 self.__models.append(NumPyBased0hlNeuralNetwork())
 
+
     def bag(self, m, k=10):
         index_pool = [i for i in range(m)]
         index_bags = []
