@@ -9,7 +9,7 @@ class EnsembleClassificationWrapper(object):
         self.__models = [None for i in range(number_models)]
         for i in range(number_models):
             if type == "NumPyBased0hlNeuralNetwork":
-                self.__models.append(NumPyBased0hlNeuralNetwork())
+                self.__models[i] = NumPyBased0hlNeuralNetwork()
             else:
                 if debug_mode:
                     print("Error: unsupported type of model")
@@ -17,7 +17,7 @@ class EnsembleClassificationWrapper(object):
                 break
 
 
-    def bag(self, X, Y, k=10, debug_mode=False):
+    def bag(self, X, Y, k, debug_mode=False):
         if X.shape[1] != Y.shape[1]:
             if debug_mode:
                 print("Error: inconsistent number of examples")
@@ -58,8 +58,8 @@ class EnsembleClassificationWrapper(object):
             return False
         X_bags, Y_bags = self.bag(X=X, Y=Y, k=len(self.__models), debug_mode=debug_mode)
         for i in range(len(self.__models)):
-            X_bag = X_bags[i]
-            Y_bag = Y_bags[i]
+            X_bag = X_bags[i % len(X_bags)]
+            Y_bag = Y_bags[i % len(Y_bags)]
             self.__models[i].fit(X=X_bag, Y=Y_bag, batch_size=batch_size, debug_mode=debug_mode)
         return True
 
@@ -68,8 +68,8 @@ class EnsembleClassificationWrapper(object):
         Y_ensemble = np.empty((len(self.__models), X.shape[1]))
         # each internal model make a prediction in regular representation
         for i in range(len(self.__models)):
-            Y_regular = model.predict(X=X, debug_mode=debug_mode)
+            Y_regular = self.__models[i].predict(X=X, debug_mode=debug_mode)
             Y_ensemble[i, :] = Y_regular
         # use majority rule to make the final prediction
-        Y_majority = stats.mode(Y_ensemble, axis=0)
+        Y_majority = np.array(stats.mode(Y_ensemble, axis=0)[0]).reshape(1, X.shape[1])
         return Y_majority
