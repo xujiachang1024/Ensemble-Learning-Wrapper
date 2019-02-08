@@ -10,9 +10,28 @@ class EnsembleClassificationWrapper(object):
         for i in range(number_models):
             if type == "NumPyBased0hlNeuralNetwork":
                 self.__models.append(NumPyBased0hlNeuralNetwork())
+            else:
+                if debug_mode:
+                    print("Error: unsupported type of model")
+                    print("\tStack trace: EnsembleClassificationWrapper.__init__()")
+                break
 
 
-    def bag(self, m, k=10):
+    def bag(self, X, Y, k=10, debug_mode=False):
+        if X.shape[1] != Y.shape[1]:
+            if debug_mode:
+                print("Error: inconsistent number of examples")
+                print("\tStack trace: EnsembleClassificationWrapper.bag()")
+            return None
+        # get the number of examples
+        m = Y.shape[1]
+        # sanity check: compare k and m
+        if k > m:
+            k = m
+            if debug_mode:
+                print("Warning: the number of bags, k, cannot be larger than the number of examples, m; k is automatically reset to m")
+                print("\tStack trace: EnsembleClassificationWrapper.bag()")
+        # bag indices of examples randomly without replacement into different bags
         index_pool = [i for i in range(m)]
         index_bags = []
         for i in range(k - 1):
@@ -23,27 +42,34 @@ class EnsembleClassificationWrapper(object):
                 index_bag.append(index_chosen)
             index_bags.append(index_bag)
         index_bags.append(index_pool)
-        return index_bags
+        # bag examples into different bags based on index_bags
+        X_bags = []
+        Y_bags = []
+        for index_bag in index_bags:
+            X_bags.append(X[:, index_bag])
+            Y_bags.append(Y[:, index_bag])
+        return (X_bags, Y_bags)
 
     def fit(self, X, Y, batch_size=1, debug_mode=False):
-        merged_dataset = np.concatenate(X, Y, axis=0)
-        m = merged_dataset.shape[1]
-        bagged_dataset = []
-        index_bags = self.bag(m=m, k=len(self.__models))
-        for index_bag in index_bags:
-            bagged_dataset.append(merged_dataset[:, index_bag])
+        if X.shape[1] != Y.shape[1]:
+            if debug_mode:
+                print("Error: inconsistent number of examples")
+                print("\tStack trace: EnsembleClassificationWrapper.fit()")
+            return False
+        X_bags, Y_bags = self.bag(X=X, Y=Y, k=len(self.__models), debug_mode=debug_mode)
         for i in range(len(self.__models)):
-            X_bagged = bagged_dataset[i][0:X.shape[0], m]
-            Y_bagged = bagged_dataset[i][X.shape[0]: X.shape[0] + Y.shape[0], m]
-            self.__models.fit(X=X_bagged, Y=Y_bagged, batch_size=batch_size, debug_mode=debug_mode)
+            X_bag = X_bags[i]
+            Y_bag = Y_bags[i]
+            self.__models[i].fit(X=X_bag, Y=Y_bag, batch_size=batch_size, debug_mode=debug_mode)
+        return True
 
     def predict(self, X, debug_mode=False):
+        # initialize the NumPy array for ensemble prediction
         Y_ensemble = np.empty((len(self.__models), X.shape[1]))
+        # each internal model make a prediction in regular representation
         for i in range(len(self.__models)):
             Y_regular = model.predict(X=X, debug_mode=debug_mode)
             Y_ensemble[i, :] = Y_regular
+        # use majority rule to make the final prediction
         Y_majority = stats.mode(Y_ensemble, axis=0)
         return Y_majority
-
-wrapper = EnsembleClassificationWrapper()
-print(wrapper.bag(m=145, k=10))
