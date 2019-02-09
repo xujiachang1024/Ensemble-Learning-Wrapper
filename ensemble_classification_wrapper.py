@@ -8,10 +8,10 @@ from numpy_based_0hl_neural_network import NumPyBased0hlNeuralNetwork
 
 class EnsembleClassificationWrapper(object):
 
-    def __init__(self, type="NumPyBased0hlNeuralNetwork", number_models=10, debug_mode=False):
+    def __init__(self, type="logistic_regression", configuration=None, number_models=10, debug_mode=False):
         self.__models = [None for i in range(number_models)]
         for i in range(number_models):
-            if type == "NumPyBased0hlNeuralNetwork":
+            if type == "logistic_regression":
                 self.__models[i] = NumPyBased0hlNeuralNetwork()
             else:
                 if debug_mode:
