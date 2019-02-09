@@ -23,7 +23,7 @@ def read_from_file(filename="good-moves.txt"):
             example = np.array(example)
             examples.append(example)
     examples = np.array(examples)
-    data = examples[:, 0: -1]
+    data = examples[:, 0: 8]
     target = examples[:, -1: examples.shape[1]]
     return (data, target)
 
@@ -65,13 +65,17 @@ def main(debug_mode=True):
         print("X_test.shape:\t " + str(X_test.shape))
         print("Y_train.shape:\t " + str(Y_train.shape))
         print("Y_test.shape:\t " + str(Y_test.shape))
-    ensemble_classification_wrapper = EnsembleClassificationWrapper(type="logistic_regression", configuration=None, number_models=10, debug_mode=debug_mode)
+    L = 2
+    dimensions = {0: X_train.shape[0], 1: 10, 2: 5, 3:Y_train.shape[0]}
+    activations = {1: "sigmoid", 2: "sigmoid", 3: "sigmoid"}
+    configuration = (L, dimensions, activations)
+    ensemble_classification_wrapper = EnsembleClassificationWrapper(type="neural_network", configuration=configuration, number_models=10, debug_mode=debug_mode)
     ensemble_classification_wrapper.fit(X=X_train, Y=Y_train, batch_size=100, debug_mode=debug_mode)
     Y_majority = ensemble_classification_wrapper.predict(X_test)
-    Y_test_regular = convert_target_from_onehots_to_regular(Y_test)
-    print(Y_majority.shape)
-    print(Y_test_regular.shape)
-    F1_score = f1_score(Y_test_regular.T, Y_majority.T, average="weighted")
+    Y_test_reg = convert_target_from_onehots_to_regular(Y_test)
+    print("Y_majority.shape:\t" + str(Y_majority.shape))
+    print("Y_test_reg.shape:\t" + str(Y_test_reg.shape))
+    F1_score = f1_score(Y_test_reg.T, Y_majority.T, average="weighted")
     print("Test set F1 score = " + str(F1_score))
 
 main()

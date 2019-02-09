@@ -5,6 +5,8 @@ from scipy import stats
 import sys
 sys.path.insert(0, "../NumPy-based-0hl-Neural-Net/")
 from numpy_based_0hl_neural_network import NumPyBased0hlNeuralNetwork
+sys.path.insert(0, "../NumPy-based-Neural_Network/")
+from numpy_based_neural_network import NumPyBasedNeuralNetwork
 
 class EnsembleClassificationWrapper(object):
 
@@ -13,6 +15,11 @@ class EnsembleClassificationWrapper(object):
         for i in range(number_models):
             if type == "logistic_regression":
                 self.__models[i] = NumPyBased0hlNeuralNetwork()
+            elif type == "neural_network":
+                L = configuration[0]
+                dimensions = configuration[1]
+                activations = configuration[2]
+                self.__models[i] = NumPyBasedNeuralNetwork(L=L, dimensions=dimensions, activations=activations, debug_mode=debug_mode)
             else:
                 if debug_mode:
                     print("Error: unsupported type of model")
@@ -63,7 +70,7 @@ class EnsembleClassificationWrapper(object):
         for i in range(len(self.__models)):
             X_bag = X_bags[i % len(X_bags)]
             Y_bag = Y_bags[i % len(Y_bags)]
-            self.__models[i].fit(X=X_bag, Y=Y_bag, batch_size=batch_size, debug_mode=debug_mode)
+            self.__models[i].fit(X=X_bag, Y=Y_bag, batch_size=5, debug_mode=debug_mode)
         return True
 
     def predict(self, X, debug_mode=False):
