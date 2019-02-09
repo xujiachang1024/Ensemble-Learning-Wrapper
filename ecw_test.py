@@ -1,6 +1,5 @@
 import numpy as np
 from ensemble_classification_wrapper import EnsembleClassificationWrapper
-from numpy_based_0hl_neural_network import NumPyBased0hlNeuralNetwork
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import f1_score
 import warnings

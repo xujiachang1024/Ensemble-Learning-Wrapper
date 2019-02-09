@@ -1,6 +1,9 @@
 import random
 import numpy as np
 from scipy import stats
+
+import sys
+sys.path.insert(0, "../NumPy-based-0hl-Neural-Net/")
 from numpy_based_0hl_neural_network import NumPyBased0hlNeuralNetwork
 
 class EnsembleClassificationWrapper(object):
