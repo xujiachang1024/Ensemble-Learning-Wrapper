@@ -3,9 +3,9 @@ import numpy as np
 from scipy import stats
 
 import sys
-sys.path.insert(0, "../NumPy-based-0hl-Neural-Net/")
+sys.path.insert(0, "../NumPy-based-Logistic-Regression/")
 from numpy_based_0hl_neural_network import NumPyBased0hlNeuralNetwork
-sys.path.insert(0, "../NumPy-based-Neural_Network/")
+sys.path.insert(0, "../NumPy-based-Neural-Network/")
 from numpy_based_neural_network import NumPyBasedNeuralNetwork
 
 class EnsembleClassificationWrapper(object):

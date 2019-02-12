@@ -69,7 +69,7 @@ def main(debug_mode=True):
     dimensions = {0: X_train.shape[0], 1: 10, 2: 5, 3:Y_train.shape[0]}
     activations = {1: "sigmoid", 2: "sigmoid", 3: "sigmoid"}
     configuration = (L, dimensions, activations)
-    ensemble_classification_wrapper = EnsembleClassificationWrapper(type="neural_network", configuration=configuration, number_models=10, debug_mode=debug_mode)
+    ensemble_classification_wrapper = EnsembleClassificationWrapper(type="logistic_regression", configuration=None, number_models=10, debug_mode=debug_mode)
     ensemble_classification_wrapper.fit(X=X_train, Y=Y_train, batch_size=100, debug_mode=debug_mode)
     Y_majority = ensemble_classification_wrapper.predict(X_test)
     Y_test_reg = convert_target_from_onehots_to_regular(Y_test)
